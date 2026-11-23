@@ -1,0 +1,6 @@
+policy,emails_sent_per_1000,spend_per_1000,ci_low,ci_high,visits_per_1000
+Email nobody,0,738.0,496.0,1013.0,102.3
+Womens email to everyone,1000,1199.0,836.0,1646.0,155.2
+Mens email to everyone,1000,1239.0,883.0,1650.0,178.6
+"Model picks the email, everyone",1000,1369.0,987.0,1786.0,184.8
+"Model picks the email, top 50% only",500,1093.0,794.0,1451.0,149.1

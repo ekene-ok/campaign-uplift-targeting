@@ -1,0 +1,12 @@
+dimension,segment_value,customers,visit_uplift_mens,visit_uplift_womens,spend_uplift_mens,spend_uplift_womens,better_email_by_visits
+Area,Rural,9563,0.0734,0.0291,0.756,0.515,Mens E-Mail
+Area,Surburban,28776,0.0743,0.0489,0.804,0.177,Mens E-Mail
+Area,Urban,25661,0.0796,0.0469,0.737,0.669,Mens E-Mail
+Channel,Multichannel,7762,0.0829,0.0471,1.209,1.158,Mens E-Mail
+Channel,Phone,28021,0.0756,0.0446,0.564,0.232,Mens E-Mail
+Channel,Web,28217,0.0756,0.0457,0.85,0.416,Mens E-Mail
+New customer,Existing,31856,0.0778,0.0401,0.578,0.114,Mens E-Mail
+New customer,New (last 12 months),32144,0.0753,0.0504,0.96,0.732,Mens E-Mail
+Purchase history,Bought both,6448,0.1344,0.0711,1.825,0.162,Mens E-Mail
+Purchase history,Bought mens only,28818,0.0692,0.0111,0.683,0.278,Mens E-Mail
+Purchase history,Bought womens only,28734,0.0706,0.074,0.616,0.632,Womens E-Mail

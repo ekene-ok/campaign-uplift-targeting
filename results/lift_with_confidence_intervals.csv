@@ -1,0 +1,7 @@
+arm,metric,control,treated,uplift,ci_low,ci_high,relative_lift
+Mens E-Mail,visit,0.10617,0.18276,0.07659,0.07007,0.08344,0.721
+Mens E-Mail,conversion,0.00573,0.01253,0.00681,0.00502,0.00854,1.188
+Mens E-Mail,spend,0.65279,1.42262,0.76983,0.48777,1.05477,1.179
+Womens E-Mail,visit,0.10617,0.1514,0.04523,0.0391,0.05132,0.426
+Womens E-Mail,conversion,0.00573,0.00884,0.00311,0.00157,0.0047,0.543
+Womens E-Mail,spend,0.65279,1.0772,0.42441,0.17755,0.68836,0.65
