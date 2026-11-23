@@ -94,8 +94,16 @@ fig, ax = plt.subplots(figsize=(8, 3.2))
 ax.plot(cv["share_emailed"] * 100, cv["net_value_per_1000"], color=CONTEXT, linewidth=2.5)
 ax.scatter([best["share_emailed"] * 100], [best["net_value_per_1000"]], color=HIGHLIGHT, s=90, zorder=3)
 label = "Best: email everyone" if best["share_emailed"] >= 0.999 else f"Best: email the top {best['share_emailed']:.0%}"
-ax.annotate(label, (best["share_emailed"] * 100, best["net_value_per_1000"]),
-            xytext=(-10, -18), textcoords="offset points", ha="right", color=INK, fontweight="bold")
+# Place the label above the point, on the side with room, so it never overlaps the line or the axis.
+bx = best["share_emailed"] * 100
+on_right = bx < 50
+ax.annotate(label, (bx, best["net_value_per_1000"]), xytext=(10 if on_right else -10, 14),
+            textcoords="offset points", ha="left" if on_right else "right", va="bottom",
+            color=INK, fontweight="bold")
+lo, hi = cv["net_value_per_1000"].min(), cv["net_value_per_1000"].max()
+span = max(hi - lo, 1)
+ax.set_ylim(min(lo, 0) - span * 0.05, max(hi, 0) + span * 0.25)
+ax.set_xlim(0, 103)
 ax.axhline(0, color=INK2, linewidth=0.6)
 for s in ["top", "right"]:
     ax.spines[s].set_visible(False)
