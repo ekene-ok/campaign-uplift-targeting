@@ -1,5 +1,7 @@
 # Campaign Uplift Targeting: Who Should Get Which Email?
 
+**[Try the live app](https://ekene-uplift-targeting.streamlit.app/)**: pick a customer segment and see which email works, and how many customers are worth emailing.
+
 An analysis of a randomised email test with 64,000 customers. It measures what each email actually caused, finds which customers each email works for, and builds an uplift model that recommends the right email for every customer.
 
 Built with **DuckDB SQL** and **Python (scikit-learn)**.
@@ -23,7 +25,9 @@ On a held-out 30% of customers, letting the model choose the email for everyone 
 
 ## Try it yourself
 
-An interactive explorer ([`app.py`](app.py)) lets you pick any customer segment and see which email works better for it, then set a cost per email and a value per extra visit to see how many customers are worth emailing. It runs on the model outputs in `results/`, so it needs no raw data:
+**Live app: [ekene-uplift-targeting.streamlit.app](https://ekene-uplift-targeting.streamlit.app/)**
+
+An interactive explorer ([`app.py`](app.py)) lets you pick any customer segment and see which email works better for it, then set a cost per email and a value per extra visit to see how many customers are worth emailing. It runs on the model outputs in `results/`, so it needs no raw data. To run it locally:
 
 ```bash
 pip install -r requirements.txt
