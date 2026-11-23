@@ -21,6 +21,15 @@ The key idea is **uplift**: the value of an email is the extra behaviour it caus
 
 On a held-out 30% of customers, letting the model choose the email for everyone produced 185 visits per 1,000 customers, against 179 for sending everyone the men's email and 102 for sending nothing.
 
+## Try it yourself
+
+An interactive explorer ([`app.py`](app.py)) lets you pick any customer segment and see which email works better for it, then set a cost per email and a value per extra visit to see how many customers are worth emailing. It runs on the model outputs in `results/`, so it needs no raw data:
+
+```bash
+pip install -r requirements.txt
+streamlit run app.py
+```
+
 ## Charts
 
 ![The men's email drove 1.8x the extra spend of the women's](charts/01_extra_spend_by_email.png)
@@ -71,6 +80,7 @@ Visits are the reliable signal here. Spend is so sparse (about 1% of customers b
 ## Repository structure
 
 ```
+app.py                        interactive explorer (Streamlit)
 sql/
   01_experiment_results.sql   customer table, results per group, balance check
   02_segment_uplift.sql       uplift by purchase history, area, channel and tenure
