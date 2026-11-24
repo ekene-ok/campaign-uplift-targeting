@@ -36,32 +36,38 @@ b.headline(fig, "One email does almost all the work",
 b.source(fig, SRC)
 b.finish(fig, OUT / "01_one_email_does_the_work.png", top=0.80, bottom=0.12, left=0.33)
 
-# Chart 2: targeting pays only once contacts cost real money ----------------------------------
+# Chart 2: what a targeting model adds over the best choice without one ----------------------
 be = pd.read_csv(RES / "breakeven_curve.csv")
 v = float(pd.read_csv(RES / "value_per_visit.csv").iloc[0, 0])
 be["cost"] = be.cost_per_contact_in_visits * v
 be = be[be.cost <= 1.6]
+be["no_model"] = be.net_visits_send_all.clip(lower=0) * v   # email everyone, or skip the campaign once that loses money
+be["model"] = be.net_visits_targeted * v
+cross = be.iloc[0].net_visits_send_all / 1000 * v
+gap = (be.model - be.no_model).max()
 fig, ax = b.figure(8, 5)
-ax.plot(be.cost, be.net_visits_send_all * v, color=b.CONTEXT, linewidth=2.2)
-ax.plot(be.cost, be.net_visits_targeted * v, color=HL, linewidth=2.6)
-ax.axhline(0, color=b.HAIRLINE, linewidth=1)
-cross = be.iloc[0].net_visits_send_all / 1000 * v  # average extra visits per contact x value per visit
+ax.fill_between(be.cost, be.no_model, be.model, where=be.model >= be.no_model, color=HL, alpha=0.18, linewidth=0)
+ax.plot(be.cost, be.no_model, color=b.CONTEXT, linewidth=2.2)
+ax.plot(be.cost, be.model, color=HL, linewidth=2.6)
 ax.axvline(cross, color=b.HAIRLINE, linewidth=1)
-ax.text(cross + 0.03, be.net_visits_targeted.max() * v * 0.95, f"Sending to everyone stops\npaying at about ${cross:.2f}",
+ax.text(cross + 0.03, 780, f"At ${cross:.2f} a contact, emailing\neveryone stops paying, so\nwithout a model you skip it",
         fontsize=9.5, color=b.MUTED, va="top")
-end = be.iloc[-1]
-ax.text(end.cost + 0.02, end.net_visits_send_all * v, "Email everyone", va="center", fontsize=10, color=b.MUTED)
-ax.text(1.02, be[be.cost.between(0.95, 1.05)].net_visits_targeted.mean() * v + 40,
-        "Contact only predicted\ntop responders", va="bottom", fontsize=10, color=HL)
-ax.set_xlim(0, 1.95)
+ax.text(0.33, 590, "With the model", fontsize=10, color=HL, ha="left")
+ax.text(0.03, 290, "Best choice without a model:\nemail everyone", fontsize=10, color=b.MUTED, ha="left", va="top")
+ax.text(1.02, 75, f"Shaded gap = what the model adds,\nnever more than ${gap:.0f} per 1,000 customers",
+        fontsize=9.5, color=b.INK, va="bottom")
+ax.set_xlim(0, 1.6)
+ax.set_ylim(-20, 880)
 ax.set_xticks([0, 0.25, 0.5, 0.75, 1.0, 1.25, 1.5])
 ax.set_xticklabels(["$0", "$0.25", "$0.50", "$0.75", "$1.00", "$1.25", "$1.50"])
-ax.set_yticks([-500, 0, 500])
-ax.set_yticklabels(["-$500", "$0", "$500"])
+ax.set_yticks([0, 200, 400, 600, 800])
+ax.set_yticklabels(["$0", "$200", "$400", "$600", "$800"])
 ax.set_xlabel("Cost per contact", color=b.MUTED, fontsize=10)
+ax.set_ylabel("Net revenue per 1,000 customers", color=b.MUTED, fontsize=10)
 b.clean(ax, keep="x")
-b.headline(fig, "Targeting only pays once each contact costs real money",
+ax.axhline(0, color=b.HAIRLINE, linewidth=1)
+b.headline(fig, "A targeting model adds little at any contact cost",
            f"Net revenue per 1,000 customers, valuing an extra visit at ${v:.0f} (revenue per extra visit in the test)")
 b.source(fig, SRC)
-b.finish(fig, OUT / "02_when_targeting_pays.png", top=0.82, bottom=0.17, left=0.09)
+b.finish(fig, OUT / "02_when_targeting_pays.png", top=0.82, bottom=0.17, left=0.12)
 print("charts saved")

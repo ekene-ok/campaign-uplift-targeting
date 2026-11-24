@@ -39,7 +39,7 @@ st.title("Is personalised targeting worth it?")
 st.write("Explore the results of a randomised email test with 64,000 customers: one group got a men's merchandise "
          "email, one a women's email, and one nothing. Uplift is the extra visits an email caused compared with "
          "sending nothing. The short answer: for email, one well-chosen email to everyone does almost all the work. "
-         "Targeting starts to pay once each contact costs real money. [Read the full analysis](https://github.com/ekene-ok/campaign-uplift-targeting)")
+         "A targeting model only earns its keep once a mass send stops paying. [Read the full analysis](https://github.com/ekene-ok/campaign-uplift-targeting)")
 
 # Section 2: is targeting worth it?
 st.header("1. Is targeting worth it for your channel?")
@@ -58,14 +58,16 @@ tgt = np.interp(ratio, r, be["net_visits_targeted"]) if ratio <= r.max() else 0.
 share = np.interp(ratio, r, be["share_contacted"]) if ratio <= r.max() else 0.0
 blanket = BLANKET_VISITS - ratio * 1000
 net_all, net_tgt = blanket * value, tgt * value
+no_model = max(net_all, 0.0)  # without a model: email everyone, or skip the campaign once that loses money
 def money(x):
     return f"-${abs(x):,.0f}" if x < 0 else f"${x:,.0f}"
 
 # Targeting is the call only when it leaves a real share of customers out AND clearly beats contacting everyone
-best_is_target = 0.02 <= share < 0.9 and net_tgt - net_all > 20
+best_is_target = 0.02 <= share < 0.9 and net_tgt - no_model > 20
 n1, n2, n3 = st.columns(3)
-n1.metric("Net value, contact everyone (per 1,000)", money(net_all))
-n2.metric("Net value, contact predicted responders (per 1,000)", money(net_tgt))
+n1.metric("Best without a model (per 1,000)", money(no_model),
+          help="Contact everyone while that pays; otherwise skip the campaign.")
+n2.metric("With the model (per 1,000)", money(net_tgt))
 n3.metric("Share of customers worth contacting", f"{share:.0%}")
 if best_is_target:
     st.success(f"Target. At ${cost:.2f} a contact, contact only the top {share:.0%} of customers by predicted uplift.")
@@ -77,16 +79,18 @@ else:
 costs = np.linspace(0, 2, 81)
 rr = costs / value
 fig, ax = plt.subplots(figsize=(8, 3.6))
-y_all = (BLANKET_VISITS - rr * 1000) * value
+y_all = np.clip((BLANKET_VISITS - rr * 1000) * value, 0, None)
 y_tgt = np.where(rr <= r.max(), np.interp(rr, r, be["net_visits_targeted"]), 0) * value
+ax.fill_between(costs, y_all, y_tgt, where=y_tgt >= y_all, color=HL, alpha=0.18, linewidth=0)
 ax.plot(costs, y_all, color=b.CONTEXT, linewidth=2.2)
 ax.plot(costs, y_tgt, color=HL, linewidth=2.6)
 ax.axhline(0, color=b.HAIRLINE, linewidth=1)
-ax.scatter([cost], [net_tgt if best_is_target else net_all], color=b.INK, s=40, zorder=3)
-ax.text(costs[-1] + 0.03, y_all[-1], "Contact everyone", va="center", fontsize=9, color=b.MUTED)
-ax.text(costs[-1] + 0.03, y_tgt[-1], "Contact predicted\nresponders", va="center", fontsize=9, color=HL)
-ax.set_xlim(0, 2.45)
+ax.scatter([cost], [net_tgt if best_is_target else no_model], color=b.INK, s=40, zorder=3)
+ax.text(0.04, max(y_all[0], y_tgt[0]) * 0.2, "Without a model:\ncontact everyone,\nor skip once it loses money", va="center", fontsize=9, color=b.MUTED)
+ax.text(costs[12] + 0.06, y_tgt[12] + max(y_tgt[0], 1) * 0.08, "With the model", va="bottom", fontsize=9, color=HL)
+ax.set_xlim(0, 2.0)
 ax.set_xlabel("Cost per contact", color=b.MUTED)
+ax.set_ylabel("Net value per 1,000 customers", color=b.MUTED, fontsize=9)
 b.clean(ax, keep="x")
 from matplotlib.ticker import FuncFormatter
 ax.xaxis.set_major_formatter(FuncFormatter(lambda x, _: f"${x:.2f}"))
@@ -95,8 +99,8 @@ ax.tick_params(axis="y", labelsize=9)
 ax.set_title("Net value per 1,000 customers as the cost per contact rises", loc="left", fontsize=12, color=b.INK)
 chart_col, _ = st.columns([3, 2])
 chart_col.pyplot(fig)
-st.caption(f"Contacting everyone stops paying once a contact costs more than about {BLANKET_VISITS / 10:.1f}% of an "
-           "extra visit's value. Results are measured on the held-out 30% of customers using the random assignment.")
+st.caption(f"Without a model, you contact everyone until a contact costs more than about {BLANKET_VISITS / 10:.1f}% of an "
+           "extra visit's value, then skip the campaign. The shaded gap is what the model adds. Results are measured on the held-out 30% of customers using the random assignment.")
 
 # Section 1: segment explorer
 st.header("2. Which email works for which customers?")

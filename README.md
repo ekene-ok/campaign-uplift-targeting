@@ -16,11 +16,11 @@ The key idea is **uplift**: the value of an email is the extra behaviour it caus
 
 ## The answer
 
-**For email, no. Send one email, the men's, to everyone. Targeting only pays once each contact costs real money.**
+**For email, no. Send one email, the men's, to everyone. A targeting model adds little at any contact cost; its one real use is finding a small group still worth contacting once a mass send stops paying.**
 
 1. **One email does almost all the work.** Sending everyone the men's email produced 76 extra visits per 1,000 customers. Letting the model choose each customer's email added only 6 more, and the 95% interval (-1 to +13) includes zero. A second creative and a targeting model are not worth building for this channel
 2. **The women's email is never the clear winner.** It ties the men's email for women-only buyers (+7.4 vs +7.1 points of visits) and barely moves men-only buyers (+1.1 points against +6.9), who are 45% of the file
-3. **Targeting pays once a contact costs more than about 7.6% of what an extra visit is worth.** That is the point where contacting everyone stops covering its cost. With the test's revenue of about $10 per extra visit, the line sits near **$0.77 per contact**: irrelevant for email, decisive for direct mail, discounts or sales calls. At $0.90 per contact, contacting everyone loses $134 per 1,000 customers, while contacting only the top 30% by predicted uplift still earns $39
+3. **The model's edge is small at every contact cost.** Without a model, the best choice is to email everyone while a contact costs less than about **$0.77** (7.6% of what an extra visit is worth) and to skip the campaign above that. The model beats that choice by at most **$76 per 1,000 customers** at any cost, and part of that gain may be noise. Its one clear use is above $0.77, where a mass send no longer pays but a small group still does: at $0.90 per contact, the top 30% by predicted uplift earns $39 per 1,000 customers instead of nothing. That matters for direct mail, discounts or sales calls, not email
 4. **Decide on visits, not spend.** The men's email beat the women's on visits by 3.1 points (95% interval 2.4 to 3.8). The spend gap ($0.35 per customer, interval -$0.04 to +$0.72) could be noise, because only about 1% of customers buy
 
 **What would change the answer:** a test with more distinct creatives (where picking the right message matters more), real contact costs such as unsubscribes and fatigue, or valuing a visit by profit instead of revenue, which moves the break-even point lower (at a 40% margin, about $0.31 per contact).
@@ -29,7 +29,7 @@ The key idea is **uplift**: the value of an email is the extra behaviour it caus
 
 ![One email does almost all the work](charts/01_one_email_does_the_work.png)
 
-![Targeting only pays once each contact costs real money](charts/02_when_targeting_pays.png)
+![A targeting model adds little at any contact cost](charts/02_when_targeting_pays.png)
 
 ## Results
 
