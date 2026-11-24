@@ -1,63 +1,67 @@
-"""README charts: one message per chart, one highlight colour, direct labels."""
+"""README charts in the portfolio chart style: one message per chart, one highlight colour, direct labels."""
 from pathlib import Path
+import sys
 import pandas as pd
-import matplotlib
-matplotlib.use("Agg")
-import matplotlib.pyplot as plt
+sys.path.insert(0, str(Path(__file__).parent))
+import brand_style as b
 
 ROOT = Path(__file__).resolve().parents[1]
 RES, OUT = ROOT / "results", ROOT / "charts"
 OUT.mkdir(exist_ok=True)
-SURFACE, INK, INK2 = "#ffffff", "#1a1a1a", "#6b6a66"
-HIGHLIGHT, CONTEXT = "#e0612e", "#d9d8d3"
-plt.rcParams.update({"font.family": "DejaVu Sans", "font.size": 11, "text.color": INK,
-                     "figure.facecolor": SURFACE, "axes.facecolor": SURFACE})
+HL = b.PROJECT["campaign-uplift-targeting"]
+SRC = "Kevin Hillstrom MineThatData email test (64,000 customers); held-out 30% for policy results"
 
+# Chart 1: one email does almost all the work -------------------------------------------------
+pol = pd.read_csv(RES / "policy_comparison.csv").set_index("policy")
+base = pol.loc["Email nobody", "visits_per_1000"]
+rows = [("Women's email to everyone", "Womens email to everyone"),
+        ("Men's email to everyone", "Mens email to everyone"),
+        ("Model picks each customer's email", "Model picks the email, everyone")]
+vals = [pol.loc[k, "visits_per_1000"] - base for _, k in rows]
+fig, ax = b.figure(8, 4.2)
+colors = [b.CONTEXT, HL, b.CONTEXT]
+bars = ax.barh([r[0] for r in rows][::-1], vals[::-1], color=colors[::-1], height=0.55)
+gain = pd.read_csv(RES / "is_the_difference_real.csv").iloc[0]
+notes = ["", "", f"  only +{gain.estimate:.0f} more, not a clear gain"][::-1]
+for bar, v, note, c in zip(bars, vals[::-1], notes, colors[::-1]):
+    ax.text(v + 1, bar.get_y() + bar.get_height() / 2, f"+{v:.0f}", va="center", fontsize=11.5,
+            color=b.INK)
+    if note:
+        ax.text(v + 17, bar.get_y() + bar.get_height() / 2, note.strip(), va="center", fontsize=9.5, color=b.MUTED)
+ax.set_xlim(0, max(vals) * 2.15)
+ax.set_xticks([])
+b.clean(ax, keep="y")
+b.headline(fig, "One email does almost all the work",
+           "Extra website visits per 1,000 customers, compared with sending no email")
+b.source(fig, SRC)
+b.finish(fig, OUT / "01_one_email_does_the_work.png", top=0.80, bottom=0.12, left=0.33)
 
-def hbar(ax, labels, values, hi_index, fmt, xmax):
-    colors = [HIGHLIGHT if i == hi_index else CONTEXT for i in range(len(values))]
-    ax.barh(labels, values, height=0.5, color=colors)
-    for y, v in enumerate(values):
-        hi = y == hi_index
-        ax.text(v + xmax * 0.015, y, fmt(v), va="center", fontsize=12 if hi else 11,
-                fontweight="bold" if hi else "normal", color=INK if hi else INK2)
-    for i, lbl in enumerate(ax.get_yticklabels()):
-        lbl.set_color(INK if i == hi_index else INK2)
-    for s in ax.spines.values():
-        s.set_visible(False)
-    ax.set_xticks([])
-    ax.tick_params(axis="y", length=0, pad=8)
-    ax.set_xlim(0, xmax)
-
-
-def titles(fig, title, subtitle):
-    fig.text(0.03, 0.97, title, fontsize=15, fontweight="bold", va="top")
-    fig.text(0.03, 0.88, subtitle, fontsize=10.5, color=INK2, va="top")
-
-
-# Chart 1: extra spend per 1,000 customers emailed
-lift = pd.read_csv(RES / "lift_with_confidence_intervals.csv").query("metric == 'spend'").set_index("arm")
-vals = [lift.loc["Womens E-Mail", "uplift"] * 1000, lift.loc["Mens E-Mail", "uplift"] * 1000]
-fig, ax = plt.subplots(figsize=(9, 3.8))
-hbar(ax, ["Women's email", "Men's email"], vals, 1, lambda v: f"${v:,.0f}", 1000)
-titles(fig, "The men's email drove 1.8x the extra spend of the women's",
-       "Extra spend per 1,000 customers in the two weeks after the email, compared with\n"
-       "customers who received no email (randomised test, 64,000 customers).")
-fig.subplots_adjust(left=0.2, right=0.97, top=0.66, bottom=0.05)
-fig.savefig(OUT / "01_extra_spend_by_email.png", dpi=200)
-plt.close(fig)
-
-# Chart 2: the women's email barely moves men-only buyers
-seg = pd.read_csv(RES / "segment_uplift.csv").query("dimension == 'Purchase history'").set_index("segment_value")
-order = ["Bought mens only", "Bought both", "Bought womens only"][::-1]
-labels = {"Bought mens only": "Men's products only", "Bought both": "Both", "Bought womens only": "Women's products only"}
-vals = [seg.loc[o, "visit_uplift_womens"] * 100 for o in order]
-fig, ax = plt.subplots(figsize=(9, 4.2))
-hbar(ax, [labels[o] for o in order], vals, 2, lambda v: f"+{v:.1f} pts", 10)
-titles(fig, "The women's email barely moves men-only buyers",
-       "Increase in website visit rate from the women's email, by what customers bought before.\n"
-       "The men's email lifts men-only buyers by +6.9 pts.")
-fig.subplots_adjust(left=0.27, right=0.97, top=0.68, bottom=0.05)
-fig.savefig(OUT / "02_womens_email_by_history.png", dpi=200)
-plt.close(fig)
-print("Charts saved to charts/")
+# Chart 2: targeting pays only once contacts cost real money ----------------------------------
+be = pd.read_csv(RES / "breakeven_curve.csv")
+v = float(pd.read_csv(RES / "value_per_visit.csv").iloc[0, 0])
+be["cost"] = be.cost_per_contact_in_visits * v
+be = be[be.cost <= 1.6]
+fig, ax = b.figure(8, 5)
+ax.plot(be.cost, be.net_visits_send_all * v, color=b.CONTEXT, linewidth=2.2)
+ax.plot(be.cost, be.net_visits_targeted * v, color=HL, linewidth=2.6)
+ax.axhline(0, color=b.HAIRLINE, linewidth=1)
+cross = be.iloc[0].net_visits_send_all / 1000 * v  # average extra visits per contact x value per visit
+ax.axvline(cross, color=b.HAIRLINE, linewidth=1)
+ax.text(cross + 0.03, be.net_visits_targeted.max() * v * 0.95, f"Sending to everyone stops\npaying at about ${cross:.2f}",
+        fontsize=9.5, color=b.MUTED, va="top")
+end = be.iloc[-1]
+ax.text(end.cost + 0.02, end.net_visits_send_all * v, "Email everyone", va="center", fontsize=10, color=b.MUTED)
+ax.text(1.02, be[be.cost.between(0.95, 1.05)].net_visits_targeted.mean() * v + 40,
+        "Contact only predicted\ntop responders", va="bottom", fontsize=10, color=HL)
+ax.set_xlim(0, 1.95)
+ax.set_xticks([0, 0.25, 0.5, 0.75, 1.0, 1.25, 1.5])
+ax.set_xticklabels(["$0", "$0.25", "$0.50", "$0.75", "$1.00", "$1.25", "$1.50"])
+ax.set_yticks([-500, 0, 500])
+ax.set_yticklabels(["-$500", "$0", "$500"])
+ax.set_xlabel("Cost per contact", color=b.MUTED, fontsize=10)
+b.clean(ax, keep="x")
+b.headline(fig, "Targeting only pays once each contact costs real money",
+           f"Net revenue per 1,000 customers, valuing an extra visit at ${v:.0f} (revenue per extra visit in the test)")
+b.source(fig, SRC)
+b.finish(fig, OUT / "02_when_targeting_pays.png", top=0.82, bottom=0.17, left=0.09)
+print("charts saved")

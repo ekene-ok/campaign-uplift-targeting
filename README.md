@@ -1,8 +1,8 @@
-# Campaign Uplift Targeting: Who Should Get Which Email?
+# Campaign Uplift Targeting: When Is Personalised Targeting Worth It?
 
-**[Try the live app](https://ekene-uplift-targeting.streamlit.app/)**: pick a customer segment and see which email works, and how many customers are worth emailing.
+**[Try the live app](https://ekene-uplift-targeting.streamlit.app/)**: set your cost per contact and see whether to contact everyone, target, or skip the campaign.
 
-An analysis of a randomised email test with 64,000 customers. It measures what each email actually caused, finds which customers each email works for, and builds an uplift model that recommends the right email for every customer.
+An analysis of a randomised email test with 64,000 customers. It measures what each email actually caused, tests whether a per-customer uplift model beats a simple rule, and works out the cost per contact at which targeting starts to pay.
 
 Built with **DuckDB SQL** and **Python (scikit-learn)**.
 
@@ -10,35 +10,26 @@ Built with **DuckDB SQL** and **Python (scikit-learn)**.
 
 An online retailer split its customers at random into three groups: one received a men's merchandise email, one a women's merchandise email, and one received nothing. Visits, purchases and spend were tracked for two weeks.
 
-**Which email should each customer get, and should some customers get no email at all?**
+Marketing teams are often told to personalise: build a model, send each customer the message they will respond to, and skip the people who will not. That takes a second creative, a model and ongoing upkeep. **Is it worth it here, and if not, when would it be?**
 
-The key idea is **uplift**: the value of an email is the extra behaviour it causes compared with doing nothing, rather than how many recipients buy. Some customers would buy anyway; some will not respond to anything. Marketing spend should go to the customers whose behaviour actually changes.
+The key idea is **uplift**: the value of an email is the extra behaviour it causes compared with doing nothing, rather than how many recipients buy.
 
-## The recommendation
+## The answer
 
-1. **Make the men's email the default.** It caused $770 in extra spend per 1,000 customers, 1.8x the women's email ($424), and it beats the women's email on visits in every area, channel and customer-tenure segment
-2. **Never send the women's email to men-only buyers.** It lifts their visit rate by just 1.1 points, against 6.9 points for the men's email. That group is 45% of the file
-3. **Let the model choose for women-only buyers.** The two emails perform the same for this group on average (+7.4 vs +7.1 points of visits). The model splits them roughly in half, sending each customer the email they are predicted to respond to more
-4. **Keep the list broad.** Ranking customers by predicted uplift concentrates the effect only modestly: emailing the top half captures 57% of the extra visits. With email costing almost nothing, cutting the list would give up 43% of the gain to save half the sends. Use uplift ranking to trim the list when each contact has a real cost, such as a discount, direct mail or a strict frequency cap
+**For email, no. Send one email, the men's, to everyone. Targeting only pays once each contact costs real money.**
 
-On a held-out 30% of customers, letting the model choose the email for everyone produced 185 visits per 1,000 customers, against 179 for sending everyone the men's email and 102 for sending nothing.
+1. **One email does almost all the work.** Sending everyone the men's email produced 76 extra visits per 1,000 customers. Letting the model choose each customer's email added only 6 more, and the 95% interval (-1 to +13) includes zero. A second creative and a targeting model are not worth building for this channel
+2. **The women's email is never the clear winner.** It ties the men's email for women-only buyers (+7.4 vs +7.1 points of visits) and barely moves men-only buyers (+1.1 points against +6.9), who are 45% of the file
+3. **Targeting pays once a contact costs more than about 7.6% of what an extra visit is worth.** That is the point where contacting everyone stops covering its cost. With the test's revenue of about $10 per extra visit, the line sits near **$0.77 per contact**: irrelevant for email, decisive for direct mail, discounts or sales calls. At $0.90 per contact, contacting everyone loses $134 per 1,000 customers, while contacting only the top 30% by predicted uplift still earns $39
+4. **Decide on visits, not spend.** The men's email beat the women's on visits by 3.1 points (95% interval 2.4 to 3.8). The spend gap ($0.35 per customer, interval -$0.04 to +$0.72) could be noise, because only about 1% of customers buy
 
-## Try it yourself
-
-**Live app: [ekene-uplift-targeting.streamlit.app](https://ekene-uplift-targeting.streamlit.app/)**
-
-An interactive explorer ([`app.py`](app.py)) lets you pick any customer segment and see which email works better for it, then set a cost per email and a value per extra visit to see how many customers are worth emailing. It runs on the model outputs in `results/`, so it needs no raw data. To run it locally:
-
-```bash
-pip install -r requirements.txt
-streamlit run app.py
-```
+**What would change the answer:** a test with more distinct creatives (where picking the right message matters more), real contact costs such as unsubscribes and fatigue, or valuing a visit by profit instead of revenue, which moves the break-even point lower (at a 40% margin, about $0.31 per contact).
 
 ## Charts
 
-![The men's email drove 1.8x the extra spend of the women's](charts/01_extra_spend_by_email.png)
+![One email does almost all the work](charts/01_one_email_does_the_work.png)
 
-![The women's email barely moves men-only buyers](charts/02_womens_email_by_history.png)
+![Targeting only pays once each contact costs real money](charts/02_when_targeting_pays.png)
 
 ## Results
 
@@ -51,6 +42,29 @@ streamlit run app.py
 | Women's email | 15.1% | +4.5 pts | 0.88% | +$0.42 ($0.18 to $0.69) |
 
 Confidence intervals come from 2,000 bootstrap resamples. A balance check ([`results/balance_check.csv`](results/balance_check.csv)) confirms the three groups looked the same before the test (recency, past spend, share of new customers and product history all match to within 1%).
+
+### Is the difference real?
+
+| Comparison | Measure | Estimate | 95% interval | Clear difference? |
+|---|---|---|---|---|
+| Model picks the email vs men's email to everyone | Extra visits per 1,000 | +6.2 | -0.8 to +13.1 | No |
+| Men's email vs women's email | Visit rate | +3.1 pts | +2.4 to +3.8 | Yes |
+| Men's email vs women's email | Extra spend per customer | +$0.35 | -$0.04 to +$0.72 | No |
+
+Source: [`results/is_the_difference_real.csv`](results/is_the_difference_real.csv)
+
+### When targeting pays (held-out 30%, per 1,000 customers)
+
+The rule contacts a customer only when their predicted uplift (extra visits per contact) is worth more than the contact costs. It uses the model's predictions alone; the results come from the held-out randomised test.
+
+| Cost per contact (as share of an extra visit's value) | At $10 per visit | Share worth contacting | Net extra visits, targeted | Net extra visits, contact everyone |
+|---|---|---|---|---|
+| 6% | $0.60 | 77% | 19.8 | 16.2 |
+| 7.5% | $0.75 | 51% | 8.8 | 1.2 |
+| 9% | $0.90 | 29% | 3.8 | -13.8 |
+| 12% | $1.20 | 9% | 2.4 | -43.8 |
+
+Full curve: [`results/breakeven_curve.csv`](results/breakeven_curve.csv)
 
 ### Where each email works
 
@@ -72,7 +86,7 @@ Full segment results, including area, channel and new vs existing customers, are
 | **Model picks the email, everyone** | 1,000 | **185** | $1,369 ($987 to $1,786) |
 | Model picks the email, top 50% only | 500 | 149 | $1,093 ($794 to $1,451) |
 
-Visits are the reliable signal here. Spend is so sparse (about 1% of customers buy) that the spend intervals overlap heavily, so spend differences between the email policies are directional rather than proven.
+Visits are the reliable signal here. Spend is so sparse (about 1% of customers buy) that the spend intervals overlap heavily, so spend differences between policies are directional rather than proven.
 
 ## How it works
 
@@ -80,6 +94,7 @@ Visits are the reliable signal here. Spend is so sparse (about 1% of customers b
 2. **Model uplift (T-learner).** Three gradient-boosted models, one per group, each predicting a customer's chance of visiting from recency, past spend, product history, new-customer flag, area and channel. A customer's predicted uplift for an email = predicted visit chance with that email minus without it
 3. **Recommend an email.** Each customer gets the email with the higher predicted uplift
 4. **Evaluate honestly on held-out data.** The model trains on 70% of customers. On the other 30%, the random assignment is used to estimate what would have happened under each policy (inverse probability weighting: customers whose actual email matches the policy stand in for everyone, weighted by 3 because each group had a 1 in 3 chance)
+5. **Test whether it is worth it.** A paired bootstrap compares the model against the simple rule on the same held-out customers, and a cost-per-contact sweep finds where targeting starts to beat contacting everyone
 
 ## Repository structure
 
@@ -91,10 +106,13 @@ sql/
 scripts/
   run_all.py                  SQL, bootstrap confidence intervals, uplift model, policy evaluation
   make_charts.py              README charts
+  brand_style.py              shared chart style
 results/
   targeting_list.csv          every customer's recommended email and predicted uplift
   targeting_curve.csv         share of extra visits captured by targeting depth
   policy_comparison.csv       held-out results for each targeting policy
+  is_the_difference_real.csv  bootstrap tests: model vs simple rule, men's vs women's email
+  breakeven_curve.csv         net value of targeting vs contacting everyone, by cost per contact
   ...                         plus topline, segment and balance results
 charts/                       README charts
 ```
@@ -115,7 +133,8 @@ python scripts/make_charts.py
 - **Two-week window.** The test measured short-term response only. Effects on unsubscribes and longer-term spend are unknown
 - **Spend is noisy.** With about 1% of customers buying, spend estimates have wide intervals; the model is trained on visits, a denser signal, and spend is used for evaluation only
 - **One campaign.** The finding that the men's email wins may reflect this particular creative and season rather than a lasting rule. Re-test before treating it as policy
-- **No contact costs.** Email cost and fatigue are not in the data. The targeting curve shows how to decide once a cost per contact is known
+- **No contact costs in the data.** Email cost and fatigue are not measured. The break-even analysis shows how to decide once a cost per contact is known
+- **Revenue, not profit.** The $10 per extra visit is revenue observed in the test; use profit per visit for a stricter break-even
 
 ## Data source
 

@@ -1,0 +1,4 @@
+comparison,unit,estimate,ci_low,ci_high,clear_difference
+Model picks the email vs men's email to everyone,"extra visits per 1,000 customers",6.2,-0.8,13.1,False
+Men's email vs women's email,visit rate (percentage points),3.14,2.41,3.8,True
+Men's email vs women's email,extra spend per customer ($),0.345,-0.036,0.724,False
