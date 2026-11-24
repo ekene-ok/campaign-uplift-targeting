@@ -2,7 +2,7 @@
 
 **[Try the live app](https://ekene-uplift-targeting.streamlit.app/)**: set your cost per contact and see whether to contact everyone, target, or skip the campaign.
 
-An analysis of a randomised email test with 64,000 customers. It measures what each email actually caused, tests whether a per-customer uplift model beats a simple rule, and works out the cost per contact at which targeting starts to pay.
+An analysis of a randomised email test with 64,000 customers. It measures what each email actually caused, tests whether a per-customer uplift model beats a simple rule, and works out how much a model adds at each cost per contact.
 
 Built with **DuckDB SQL** and **Python (scikit-learn)**.
 
