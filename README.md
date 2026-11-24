@@ -27,9 +27,9 @@ The key idea is **uplift**: the value of an email is the extra behaviour it caus
 
 ## Charts
 
-![One email does almost all the work](charts/01_one_email_does_the_work.png)
+![Sending one email to everyone gets almost all the lift](charts/01_one_email_does_the_work.png)
 
-![A targeting model adds little at any contact cost](charts/02_when_targeting_pays.png)
+![Picking who to contact adds little, whatever a contact costs](charts/02_when_targeting_pays.png)
 
 ## Results
 

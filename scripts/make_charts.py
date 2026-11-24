@@ -17,10 +17,11 @@ base = pol.loc["Email nobody", "visits_per_1000"]
 keys = ["Womens email to everyone", "Mens email to everyone", "Model picks the email, everyone"]
 vals = [pol.loc[k, "visits_per_1000"] - base for k in keys]
 gain = pd.read_csv(RES / "is_the_difference_real.csv").iloc[0]
-fig, ax = b.chart(height=3.8, label_in=1.5)
-b.hbar(ax, ["Women's email", "Men's email", "Model's pick"], vals, {1}, lambda v: f"+{v:.0f}", HL)
-b.titles(fig, "One email does almost all the work",
-         f"Extra site visits per 1,000 customers vs no email. The model's extra {gain.estimate:.0f} is within noise")
+fig, ax = b.chart(height=4.0, label_in=1.75)
+b.hbar(ax, ["Women's email", "Men's email", "Model picks"], vals, {1}, lambda v: f"+{v:.0f}", HL,
+       sublabels=["sent to everyone", "sent to everyone", "best email for each person"])
+b.titles(fig, "Sending one email to everyone gets almost all the lift",
+         f"Extra site visits per 1,000 customers, against no email. The model's extra {gain.estimate:.0f} could be noise")
 b.credit(fig, SRC)
 b.save(fig, OUT / "01_one_email_does_the_work.png")
 
@@ -48,8 +49,8 @@ ax.set_yticks([400, 800])
 ax.set_yticklabels(["$400", "$800"])
 ax.set_xlabel("Cost per contact", fontsize=9.5, color=b.MUTED)
 b.line_axes(ax)
-b.titles(fig, "A targeting model adds little at any contact cost",
-         "Net revenue per 1,000 customers. The shaded gap is what the model adds")
+b.titles(fig, "Picking who to contact adds little, whatever a contact costs",
+         "Net revenue per 1,000 customers. Shaded: the extra from contacting only those a model picks")
 b.credit(fig, SRC)
 b.save(fig, OUT / "02_when_targeting_pays.png")
 print("charts saved")
