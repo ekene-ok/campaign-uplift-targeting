@@ -1,8 +1,38 @@
 # Campaign Uplift Targeting: When Is Personalised Targeting Worth It?
 
-**[Try the live app](https://ekene-uplift-targeting.streamlit.app/)**: set your cost per contact and see whether to contact everyone, target, or skip the campaign.
+**In one line:** for email, sending everyone the same good email beats building a model to pick a different email for each person.
 
-An analysis of a randomised email test with 64,000 customers. It measures what each email actually caused, tests whether a per-customer uplift model beats a simple rule, and works out how much a model adds at each cost per contact.
+**[Try the live app](https://ekene-uplift-targeting.streamlit.app/)**: enter what each contact costs you and it tells you whether to email everyone, target a smaller group, or skip the campaign.
+
+Marketing teams are often told to personalise: use a model to send each customer the message they're most likely to respond to. That means extra creative work and a model to maintain. I used a real email test from an online retailer: 64,000 customers, split at random to get a men's email, a women's email, or no email. **Is personalising worth it?**
+
+## What I found
+
+- **One email does almost all the work.** Sending everyone the men's email brought 76 extra website visits per 1,000 customers. Letting a model choose the email for each person added only about 6 more, too few to be sure it's real
+- **The women's email never clearly wins,** even with customers who had only bought women's items before
+- **Targeting only pays when contacting people is expensive.** Below about $0.77 per contact, email everyone. Above that, a model helps you pick the small group still worth contacting, which matters for direct mail or discounts, not email
+
+![Sending everyone one email gets almost all the extra visits](charts/01_one_email_does_the_work.png)
+
+**How to read it:** each bar is extra website visits per 1,000 customers, compared with sending nothing. The orange bar is everyone getting the men's email (+76). Letting a model pick each person's email adds only a few more (+83).
+
+![When targeting pays](charts/02_when_targeting_pays.png)
+
+## What I'd do
+
+1. Send one strong email to everyone; skip the second version and the model
+2. Save targeting models for channels where each contact costs real money
+3. Judge the campaign on visits, which are measurable, rather than spend, which is too rare to read reliably here
+
+## Words used here
+
+- **Uplift:** what an email actually caused, compared with sending nothing
+- **Model:** a formula that predicts how each customer will respond
+
+<details>
+<summary><b>The full analysis: method, detail and how to run it</b> (for technical readers)</summary>
+
+## Tools and data
 
 Built with **DuckDB SQL** and **Python (scikit-learn)**.
 
@@ -26,10 +56,6 @@ The key idea is **uplift**: the value of an email is the extra behaviour it caus
 **What would change the answer:** a test with more distinct creatives (where picking the right message matters more), real contact costs such as unsubscribes and fatigue, or valuing a visit by profit instead of revenue, which moves the break-even point lower (at a 40% margin, about $0.31 per contact).
 
 ## Charts
-
-![Sending one email to everyone gets almost all the lift](charts/01_one_email_does_the_work.png)
-
-![Picking who to contact adds little, whatever a contact costs](charts/02_when_targeting_pays.png)
 
 ## Results
 
@@ -139,3 +165,5 @@ python scripts/make_charts.py
 ## Data source
 
 Kevin Hillstrom, "The MineThatData E-Mail Analytics And Data Mining Challenge" (2008), published on the MineThatData blog for public analysis. The raw file is not redistributed here. Code in this repository is MIT licensed.
+
+</details>
